@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SAP P2P Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f4f7fb;
+      color: #1f2937;
+    }
+
+    header {
+      background: #26a1ff;
+      color: white;
+      padding: 20px;
+    }
+
+    main {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 0 16px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    }
+
+    h1, h2 {
+      margin: 0 0 12px;
+    }
+
+    h3 {
+      margin-bottom: 10px;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin: 6px 0;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
+
+    button {
+      background: #0f766e;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #115e59;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: left;
+      font-size: 14px;
+    }
+
+    .section {
+      margin-top: 20px;
+    }
+
+    .success {
+      color: green;
+      font-size: 14px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>SAP Procure-to-Pay (P2P)</h1>
+    <p>Simulation of PR to PO to GR to Invoice to Payment</p>
+  </header>
+
+  <main>
+    <div class="grid" id="stats"></div>
+
+    <div class="grid section">
+      <div class="card">
+        <h2>Initialize</h2>
+        <button onclick="initDb()">Initialize Database</button>
+        <p id="initMsg" class="success"></p>
+      </div>
+
+      <div class="card">
+        <h2>Add Vendor</h2>
+        <input id="vendor_code" placeholder="Vendor Code" />
+        <input id="vendor_name" placeholder="Vendor Name" />
+        <input id="vendor_city" placeholder="City" />
+        <input id="vendor_terms" placeholder="Payment Terms" />
+        <button onclick="addVendor()">Save Vendor</button>
+      </div>
+
+      <div class="card">
+        <h2>Add Material</h2>
+        <input id="material_code" placeholder="Material Code" />
+        <input id="material_name" placeholder="Material Name" />
+        <input id="material_uom" placeholder="UOM" />
+        <input id="material_price" type="number" placeholder="Price" />
+        <button onclick="addMaterial()">Save Material</button>
+      </div>
+    </div>
+
+    <div class="grid section">
+      <div class="card">
+        <h2>Create PR</h2>
+        <select id="pr_material"></select>
+        <input id="pr_qty" type="number" placeholder="Quantity" />
+        <input id="pr_by" placeholder="Requested By" />
+        <button onclick="createPR()">Create PR</button>
+      </div>
+
+      <div class="card">
+        <h2>Create PO</h2>
+        <select id="po_pr"></select>
+        <select id="po_vendor"></select>
+        <button onclick="createPO()">Create PO</button>
+      </div>
+
+      <div class="card">
+        <h2>Post GR</h2>
+        <select id="gr_po"></select>
+        <input id="gr_qty" type="number" placeholder="Received Quantity" />
+        <button onclick="postGR()">Post GR</button>
+      </div>
+
+      <div class="card">
+        <h2>Verify Invoice</h2>
+        <select id="iv_po"></select>
+        <button onclick="postInvoice()">Post Invoice</button>
+      </div>
+
+      <div class="card">
+        <h2>Run Payment</h2>
+        <select id="py_invoice"></select>
+        <button onclick="runPayment()">Run Payment</button>
+      </div>
+    </div>
+
+    <div class="section card">
+      <h2>Document Overview</h2>
+
+      <div class="grid">
+        <div class="table-wrap">
+          <h3>PRs</h3>
+          <table id="prTable"></table>
+        </div>
+
+        <div class="table-wrap">
+          <h3>POs</h3>
+          <table id="poTable"></table>
+        </div>
+
+        <div class="table-wrap">
+          <h3>GRs</h3>
+          <table id="grTable"></table>
+        </div>
+
+        <div class="table-wrap">
+          <h3>Invoices</h3>
+          <table id="ivTable"></table>
+        </div>
+
+        <div class="table-wrap">
+          <h3>Payments</h3>
+          <table id="pyTable"></table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const API = '/api';
+
+    async function api(path, method = 'GET', body = null) {
+      const res = await fetch(API + path, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: body ? JSON.stringify(body) : null
+      });
+      return res.json();
+    }
+
+    function table(el, rows, cols) {
+      const head = '<tr>' + cols.map(c => `<th>${c}</th>`).join('') + '</tr>';
+      const body = rows.map(r =>
+        '<tr>' + cols.map(c => `<td>${r[c] ?? ''}</td>`).join('') + '</tr>'
+      ).join('');
+      document.getElementById(el).innerHTML = head + body;
+    }
+
+    async function initDb() {
+      const d = await api('/init', 'POST');
+      document.getElementById('initMsg').innerText = d.message;
+      await loadAll();
+    }
+
+    async function addVendor() {
+      await api('/vendors', 'POST', {
+        vendor_code: vendor_code.value,
+        vendor_name: vendor_name.value,
+        city: vendor_city.value,
+        payment_terms: vendor_terms.value
+      });
+      await loadAll();
+    }
+
+    async function addMaterial() {
+      await api('/materials', 'POST', {
+        material_code: material_code.value,
+        material_name: material_name.value,
+        uom: material_uom.value,
+        price: parseFloat(material_price.value)
+      });
+      await loadAll();
+    }
+
+    async function createPR() {
+      await api('/pr', 'POST', {
+        material_id: parseInt(pr_material.value),
+        quantity: parseFloat(pr_qty.value),
+        requested_by: pr_by.value
+      });
+      await loadAll();
+    }
+
+    async function createPO() {
+      await api('/po', 'POST', {
+        pr_id: parseInt(po_pr.value),
+        vendor_id: parseInt(po_vendor.value)
+      });
+      await loadAll();
+    }
+
+    async function postGR() {
+      await api('/gr', 'POST', {
+        po_id: parseInt(gr_po.value),
+        quantity_received: parseFloat(gr_qty.value)
+      });
+      await loadAll();
+    }
+
+    async function postInvoice() {
+      await api('/invoice', 'POST', {
+        po_id: parseInt(iv_po.value)
+      });
+      await loadAll();
+    }
+
+    async function runPayment() {
+      await api('/payment', 'POST', {
+        invoice_id: parseInt(py_invoice.value)
+      });
+      await loadAll();
+    }
+
+    async function loadAll() {
+      const [dash, vendors, materials, prs, pos, grs, invoices, payments] = await Promise.all([
+        api('/dashboard'),
+        api('/vendors'),
+        api('/materials'),
+        api('/pr'),
+        api('/po'),
+        api('/gr'),
+        api('/invoice'),
+        api('/payment')
+      ]);
+
+      document.getElementById('stats').innerHTML = Object.entries(dash)
+        .map(([k, v]) => `<div class="card"><h2>${v}</h2><p>${k.toUpperCase()}</p></div>`)
+        .join('');
+
+      pr_material.innerHTML = materials
+        .map(m => `<option value="${m.id}">${m.material_name}</option>`)
+        .join('');
+
+      po_vendor.innerHTML = vendors
+        .map(v => `<option value="${v.id}">${v.vendor_name}</option>`)
+        .join('');
+
+      po_pr.innerHTML = prs
+        .filter(x => x.status !== 'CONVERTED_TO_PO')
+        .map(p => `<option value="${p.id}">${p.pr_number}</option>`)
+        .join('');
+
+      gr_po.innerHTML = pos
+        .filter(x => x.status === 'APPROVED')
+        .map(p => `<option value="${p.id}">${p.po_number}</option>`)
+        .join('');
+
+      iv_po.innerHTML = pos
+        .filter(x => x.status === 'GOODS_RECEIVED' || x.status === 'APPROVED')
+        .map(p => `<option value="${p.id}">${p.po_number}</option>`)
+        .join('');
+
+      py_invoice.innerHTML = invoices
+        .filter(i => i.status === 'VERIFIED')
+        .map(i => `<option value="${i.id}">${i.invoice_number}</option>`)
+        .join('');
+
+      table('prTable', prs, ['pr_number', 'material_name', 'quantity', 'requested_by', 'status']);
+      table('poTable', pos, ['po_number', 'pr_number', 'vendor_name', 'status']);
+      table('grTable', grs, ['gr_number', 'po_number', 'quantity_received', 'status']);
+      table('ivTable', invoices, ['invoice_number', 'po_number', 'amount', 'status']);
+      table('pyTable', payments, ['payment_number', 'invoice_number', 'amount', 'status']);
+    }
+
+    loadAll();
+  </script>
+</body>
+</html>
