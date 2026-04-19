@@ -24,6 +24,124 @@
       padding: 0 16px;
     }
 
+    .process-flow-card {
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 20px 24px;
+      margin: 20px auto;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+      border-left: 6px solid #0a6ed1;
+      max-width: 1200px;
+    }
+
+    .process-flow-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0a2540;
+      margin-bottom: 16px;
+    }
+
+    .process-flow {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .flow-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 70px;
+      position: relative;
+      opacity: 0.45;
+      transition: all 0.3s ease;
+    }
+
+    .flow-step.active {
+      opacity: 1;
+      transform: scale(1.04);
+    }
+
+    .flow-step.completed {
+      opacity: 1;
+    }
+
+    .flow-circle {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: #d9e2ec;
+      color: #0a6ed1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      margin-bottom: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .flow-step.active .flow-circle {
+      background: #0a6ed1;
+      color: white;
+      box-shadow: 0 0 0 6px rgba(10, 110, 209, 0.15);
+    }
+
+    .flow-step.completed .flow-circle {
+      background: #1fa971;
+      color: white;
+    }
+
+    .flow-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #102a43;
+    }
+
+    .flow-line {
+      flex: 1;
+      min-width: 30px;
+      height: 4px;
+      background: #d9e2ec;
+      border-radius: 5px;
+      margin: 0 4px;
+    }
+
+    .status-message {
+      max-width: 1200px;
+      margin: 0 auto 18px auto;
+      padding: 14px 18px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 15px;
+      animation: fadeIn 0.35s ease;
+      display: none;
+    }
+
+    .status-message.success {
+      background: #e8f8f0;
+      color: #13795b;
+      border-left: 5px solid #1fa971;
+    }
+
+    .status-message.error {
+      background: #fdecec;
+      color: #b42318;
+      border-left: 5px solid #d92d20;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -59,6 +177,7 @@
       color: white;
       border: none;
       cursor: pointer;
+      font-weight: 600;
     }
 
     button:hover {
@@ -71,6 +190,7 @@
       background: white;
       border-radius: 12px;
       overflow: hidden;
+      min-width: 100%;
     }
 
     th, td {
@@ -78,6 +198,12 @@
       border-bottom: 1px solid #e5e7eb;
       text-align: left;
       font-size: 14px;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f8fafc;
+      font-weight: 700;
     }
 
     .section {
@@ -92,6 +218,25 @@
     .table-wrap {
       overflow-x: auto;
     }
+
+    .muted {
+      color: #6b7280;
+      font-size: 13px;
+    }
+
+    @media (max-width: 768px) {
+      .process-flow {
+        gap: 6px;
+      }
+
+      .flow-line {
+        min-width: 16px;
+      }
+
+      .flow-label {
+        font-size: 12px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -99,6 +244,42 @@
     <h1>SAP Procure-to-Pay (P2P)</h1>
     <p>Simulation of PR to PO to GR to Invoice to Payment</p>
   </header>
+
+  <div class="process-flow-card">
+    <div class="process-flow-title">Procure to Pay Workflow</div>
+    <div class="process-flow" id="processFlow">
+      <div class="flow-step active" data-step="pr">
+        <div class="flow-circle">1</div>
+        <div class="flow-label">PR</div>
+      </div>
+      <div class="flow-line"></div>
+
+      <div class="flow-step" data-step="po">
+        <div class="flow-circle">2</div>
+        <div class="flow-label">PO</div>
+      </div>
+      <div class="flow-line"></div>
+
+      <div class="flow-step" data-step="gr">
+        <div class="flow-circle">3</div>
+        <div class="flow-label">GR</div>
+      </div>
+      <div class="flow-line"></div>
+
+      <div class="flow-step" data-step="invoice">
+        <div class="flow-circle">4</div>
+        <div class="flow-label">Invoice</div>
+      </div>
+      <div class="flow-line"></div>
+
+      <div class="flow-step" data-step="payment">
+        <div class="flow-circle">5</div>
+        <div class="flow-label">Payment</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="statusMessage" class="status-message"></div>
 
   <main>
     <div class="grid" id="stats"></div>
@@ -108,6 +289,7 @@
         <h2>Initialize</h2>
         <button onclick="initDb()">Initialize Database</button>
         <p id="initMsg" class="success"></p>
+        <p class="muted">Run this once to create tables in SQLite.</p>
       </div>
 
       <div class="card">
@@ -124,7 +306,7 @@
         <input id="material_code" placeholder="Material Code" />
         <input id="material_name" placeholder="Material Name" />
         <input id="material_uom" placeholder="UOM" />
-        <input id="material_price" type="number" placeholder="Price" />
+        <input id="material_price" type="number" step="0.01" placeholder="Price" />
         <button onclick="addMaterial()">Save Material</button>
       </div>
     </div>
@@ -133,7 +315,7 @@
       <div class="card">
         <h2>Create PR</h2>
         <select id="pr_material"></select>
-        <input id="pr_qty" type="number" placeholder="Quantity" />
+        <input id="pr_qty" type="number" step="0.01" placeholder="Quantity" />
         <input id="pr_by" placeholder="Requested By" />
         <button onclick="createPR()">Create PR</button>
       </div>
@@ -148,7 +330,7 @@
       <div class="card">
         <h2>Post GR</h2>
         <select id="gr_po"></select>
-        <input id="gr_qty" type="number" placeholder="Received Quantity" />
+        <input id="gr_qty" type="number" step="0.01" placeholder="Received Quantity" />
         <button onclick="postGR()">Post GR</button>
       </div>
 
@@ -166,8 +348,22 @@
     </div>
 
     <div class="section card">
-      <h2>Document Overview</h2>
+      <h2>Master Data</h2>
+      <div class="grid">
+        <div class="table-wrap">
+          <h3>Vendors</h3>
+          <table id="vendorTable"></table>
+        </div>
 
+        <div class="table-wrap">
+          <h3>Materials</h3>
+          <table id="materialTable"></table>
+        </div>
+      </div>
+    </div>
+
+    <div class="section card">
+      <h2>Document Overview</h2>
       <div class="grid">
         <div class="table-wrap">
           <h3>PRs</h3>
@@ -200,138 +396,406 @@
   <script>
     const API = '/api';
 
-    async function api(path, method = 'GET', body = null) {
-      const res = await fetch(API + path, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: body ? JSON.stringify(body) : null
-      });
-      return res.json();
+    const els = {
+      stats: document.getElementById('stats'),
+      statusMessage: document.getElementById('statusMessage'),
+      initMsg: document.getElementById('initMsg'),
+
+      vendorCode: document.getElementById('vendor_code'),
+      vendorName: document.getElementById('vendor_name'),
+      vendorCity: document.getElementById('vendor_city'),
+      vendorTerms: document.getElementById('vendor_terms'),
+
+      materialCode: document.getElementById('material_code'),
+      materialName: document.getElementById('material_name'),
+      materialUom: document.getElementById('material_uom'),
+      materialPrice: document.getElementById('material_price'),
+
+      prMaterial: document.getElementById('pr_material'),
+      prQty: document.getElementById('pr_qty'),
+      prBy: document.getElementById('pr_by'),
+
+      poPr: document.getElementById('po_pr'),
+      poVendor: document.getElementById('po_vendor'),
+
+      grPo: document.getElementById('gr_po'),
+      grQty: document.getElementById('gr_qty'),
+
+      ivPo: document.getElementById('iv_po'),
+      pyInvoice: document.getElementById('py_invoice')
+    };
+
+    function normalizeList(data) {
+      if (Array.isArray(data)) return data;
+      if (data && Array.isArray(data.items)) return data.items;
+      if (data && Array.isArray(data.data)) return data.data;
+      return [];
     }
 
-    function table(el, rows, cols) {
-      const head = '<tr>' + cols.map(c => `<th>${c}</th>`).join('') + '</tr>';
-      const body = rows.map(r =>
-        '<tr>' + cols.map(c => `<td>${r[c] ?? ''}</td>`).join('') + '</tr>'
-      ).join('');
-      document.getElementById(el).innerHTML = head + body;
+    function updateProcessFlow(currentStep) {
+      const stepOrder = ['pr', 'po', 'gr', 'invoice', 'payment'];
+      const currentIndex = stepOrder.indexOf(currentStep);
+
+      document.querySelectorAll('.flow-step').forEach((step, index) => {
+        step.classList.remove('active', 'completed');
+
+        if (index < currentIndex) {
+          step.classList.add('completed');
+        } else if (index === currentIndex) {
+          step.classList.add('active');
+        }
+      });
+    }
+
+    function detectCurrentStep(prs, pos, grs, invoices, payments) {
+      if (payments.length > 0) return 'payment';
+      if (invoices.length > 0) return 'invoice';
+      if (grs.length > 0) return 'gr';
+      if (pos.length > 0) return 'po';
+      return 'pr';
+    }
+
+    function showStatus(message, type = 'success') {
+      const box = els.statusMessage;
+      box.className = `status-message ${type}`;
+      box.textContent = message;
+      box.style.display = 'block';
+
+      clearTimeout(box._timer);
+      box._timer = setTimeout(() => {
+        box.style.display = 'none';
+      }, 4000);
+    }
+
+    async function api(path, method = 'GET', body = null) {
+      const options = {
+        method,
+        headers: { 'Content-Type': 'application/json' }
+      };
+
+      if (body !== null) {
+        options.body = JSON.stringify(body);
+      }
+
+      const response = await fetch(API + path, options);
+      const rawText = await response.text();
+
+      let data = {};
+      try {
+        data = rawText ? JSON.parse(rawText) : {};
+      } catch {
+        data = { message: rawText || `HTTP ${response.status}` };
+      }
+
+      if (!response.ok) {
+        throw new Error(data.error || data.message || `HTTP ${response.status}`);
+      }
+
+      return data;
+    }
+
+    function renderTable(tableId, rows, cols, emptyMessage = 'No records found') {
+      const table = document.getElementById(tableId);
+
+      const head = `<tr>${cols.map(c => `<th>${c}</th>`).join('')}</tr>`;
+
+      if (!rows || rows.length === 0) {
+        table.innerHTML = `
+          ${head}
+          <tr>
+            <td colspan="${cols.length}" style="text-align:center;color:#6b7280;">
+              ${emptyMessage}
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      const body = rows.map(row => `
+        <tr>
+          ${cols.map(c => `<td>${row[c] ?? ''}</td>`).join('')}
+        </tr>
+      `).join('');
+
+      table.innerHTML = head + body;
+    }
+
+    function renderSelect(selectEl, rows, valueKey, labelKey, emptyLabel) {
+      if (!rows.length) {
+        selectEl.innerHTML = `<option value="">${emptyLabel}</option>`;
+        return;
+      }
+
+      selectEl.innerHTML =
+        `<option value="">Select</option>` +
+        rows.map(r => `<option value="${r[valueKey]}">${r[labelKey]}</option>`).join('');
     }
 
     async function initDb() {
-      const d = await api('/init', 'POST');
-      document.getElementById('initMsg').innerText = d.message;
-      await loadAll();
+      try {
+        const result = await api('/init', 'POST', {});
+        els.initMsg.textContent = result.message || 'Database initialized successfully';
+        showStatus(result.message || 'Database initialized successfully', 'success');
+        await loadAll();
+      } catch (error) {
+        showStatus(error.message || 'Failed to initialize database', 'error');
+      }
     }
 
     async function addVendor() {
-      await api('/vendors', 'POST', {
-        vendor_code: vendor_code.value,
-        vendor_name: vendor_name.value,
-        city: vendor_city.value,
-        payment_terms: vendor_terms.value
-      });
-      await loadAll();
+      try {
+        const payload = {
+          vendor_code: els.vendorCode.value.trim(),
+          vendor_name: els.vendorName.value.trim(),
+          city: els.vendorCity.value.trim(),
+          payment_terms: els.vendorTerms.value.trim()
+        };
+
+        if (!payload.vendor_code || !payload.vendor_name) {
+          throw new Error('Vendor code and vendor name are required');
+        }
+
+        const result = await api('/vendors', 'POST', payload);
+        showStatus(result.message || `Vendor ${payload.vendor_name} added successfully`, 'success');
+
+        els.vendorCode.value = '';
+        els.vendorName.value = '';
+        els.vendorCity.value = '';
+        els.vendorTerms.value = '';
+
+        await loadAll();
+      } catch (error) {
+        showStatus(error.message || 'Failed to add vendor', 'error');
+      }
     }
 
     async function addMaterial() {
-      await api('/materials', 'POST', {
-        material_code: material_code.value,
-        material_name: material_name.value,
-        uom: material_uom.value,
-        price: parseFloat(material_price.value)
-      });
-      await loadAll();
+      try {
+        const payload = {
+          material_code: els.materialCode.value.trim(),
+          material_name: els.materialName.value.trim(),
+          uom: els.materialUom.value.trim(),
+          price: Number(els.materialPrice.value)
+        };
+
+        if (!payload.material_code || !payload.material_name) {
+          throw new Error('Material code and material name are required');
+        }
+
+        if (Number.isNaN(payload.price) || payload.price <= 0) {
+          throw new Error('Enter a valid material price greater than 0');
+        }
+
+        const result = await api('/materials', 'POST', payload);
+        showStatus(result.message || `Material ${payload.material_name} added successfully`, 'success');
+
+        els.materialCode.value = '';
+        els.materialName.value = '';
+        els.materialUom.value = '';
+        els.materialPrice.value = '';
+
+        await loadAll();
+      } catch (error) {
+        showStatus(error.message || 'Failed to add material', 'error');
+      }
     }
 
     async function createPR() {
-      await api('/pr', 'POST', {
-        material_id: parseInt(pr_material.value),
-        quantity: parseFloat(pr_qty.value),
-        requested_by: pr_by.value
-      });
-      await loadAll();
+      try {
+        const materialId = Number(els.prMaterial.value);
+        const quantity = Number(els.prQty.value);
+        const requestedBy = els.prBy.value.trim();
+
+        if (!materialId) throw new Error('Select a material');
+        if (Number.isNaN(quantity) || quantity <= 0) throw new Error('Enter a valid quantity');
+        if (!requestedBy) throw new Error('Requested By is required');
+
+        const result = await api('/pr', 'POST', {
+          material_id: materialId,
+          quantity,
+          requested_by: requestedBy
+        });
+
+        showStatus(result.message || 'PR created successfully', 'success');
+        els.prQty.value = '';
+        els.prBy.value = '';
+
+        await loadAll();
+        updateProcessFlow('pr');
+      } catch (error) {
+        showStatus(error.message || 'Failed to create PR', 'error');
+      }
     }
 
     async function createPO() {
-      await api('/po', 'POST', {
-        pr_id: parseInt(po_pr.value),
-        vendor_id: parseInt(po_vendor.value)
-      });
-      await loadAll();
+      try {
+        const prId = Number(els.poPr.value);
+        const vendorId = Number(els.poVendor.value);
+
+        if (!prId) throw new Error('Select a PR');
+        if (!vendorId) throw new Error('Select a vendor');
+
+        const result = await api('/po', 'POST', {
+          pr_id: prId,
+          vendor_id: vendorId
+        });
+
+        showStatus(result.message || 'PO created successfully', 'success');
+        await loadAll();
+        updateProcessFlow('po');
+      } catch (error) {
+        showStatus(error.message || 'Failed to create PO', 'error');
+      }
     }
 
     async function postGR() {
-      await api('/gr', 'POST', {
-        po_id: parseInt(gr_po.value),
-        quantity_received: parseFloat(gr_qty.value)
-      });
-      await loadAll();
+      try {
+        const poId = Number(els.grPo.value);
+        const quantityReceived = Number(els.grQty.value);
+
+        if (!poId) throw new Error('Select a PO');
+        if (Number.isNaN(quantityReceived) || quantityReceived <= 0) {
+          throw new Error('Enter a valid received quantity');
+        }
+
+        const result = await api('/gr', 'POST', {
+          po_id: poId,
+          quantity_received: quantityReceived
+        });
+
+        showStatus(result.message || 'Goods Receipt posted successfully', 'success');
+        els.grQty.value = '';
+
+        await loadAll();
+        updateProcessFlow('gr');
+      } catch (error) {
+        showStatus(error.message || 'Failed to post GR', 'error');
+      }
     }
 
     async function postInvoice() {
-      await api('/invoice', 'POST', {
-        po_id: parseInt(iv_po.value)
-      });
-      await loadAll();
+      try {
+        const poId = Number(els.ivPo.value);
+        if (!poId) throw new Error('Select a PO');
+
+        const result = await api('/invoice', 'POST', {
+          po_id: poId
+        });
+
+        showStatus(result.message || 'Invoice verified successfully', 'success');
+        await loadAll();
+        updateProcessFlow('invoice');
+      } catch (error) {
+        showStatus(error.message || 'Failed to verify invoice', 'error');
+      }
     }
 
     async function runPayment() {
-      await api('/payment', 'POST', {
-        invoice_id: parseInt(py_invoice.value)
-      });
-      await loadAll();
+      try {
+        const invoiceId = Number(els.pyInvoice.value);
+        if (!invoiceId) throw new Error('Select an invoice');
+
+        const result = await api('/payment', 'POST', {
+          invoice_id: invoiceId
+        });
+
+        showStatus(result.message || 'Payment completed successfully', 'success');
+        await loadAll();
+        updateProcessFlow('payment');
+      } catch (error) {
+        showStatus(error.message || 'Failed to complete payment', 'error');
+      }
     }
 
     async function loadAll() {
-      const [dash, vendors, materials, prs, pos, grs, invoices, payments] = await Promise.all([
-        api('/dashboard'),
-        api('/vendors'),
-        api('/materials'),
-        api('/pr'),
-        api('/po'),
-        api('/gr'),
-        api('/invoice'),
-        api('/payment')
-      ]);
+      try {
+        const [
+          dashRaw,
+          vendorsRaw,
+          materialsRaw,
+          prsRaw,
+          posRaw,
+          grsRaw,
+          invoicesRaw,
+          paymentsRaw
+        ] = await Promise.all([
+          api('/dashboard'),
+          api('/vendors'),
+          api('/materials'),
+          api('/pr'),
+          api('/po'),
+          api('/gr'),
+          api('/invoice'),
+          api('/payment')
+        ]);
 
-      document.getElementById('stats').innerHTML = Object.entries(dash)
-        .map(([k, v]) => `<div class="card"><h2>${v}</h2><p>${k.toUpperCase()}</p></div>`)
-        .join('');
+        const dash = dashRaw || {};
+        const vendors = normalizeList(vendorsRaw);
+        const materials = normalizeList(materialsRaw);
+        const prs = normalizeList(prsRaw);
+        const pos = normalizeList(posRaw);
+        const grs = normalizeList(grsRaw);
+        const invoices = normalizeList(invoicesRaw);
+        const payments = normalizeList(paymentsRaw);
 
-      pr_material.innerHTML = materials
-        .map(m => `<option value="${m.id}">${m.material_name}</option>`)
-        .join('');
+        els.stats.innerHTML = Object.entries(dash)
+          .map(([k, v]) => `<div class="card"><h2>${v}</h2><p>${k.toUpperCase()}</p></div>`)
+          .join('');
 
-      po_vendor.innerHTML = vendors
-        .map(v => `<option value="${v.id}">${v.vendor_name}</option>`)
-        .join('');
+        renderSelect(els.prMaterial, materials, 'id', 'material_name', 'No materials found');
+        renderSelect(els.poVendor, vendors, 'id', 'vendor_name', 'No vendors found');
+        renderSelect(
+          els.poPr,
+          prs.filter(x => x.status !== 'CONVERTED_TO_PO'),
+          'id',
+          'pr_number',
+          'No PRs available'
+        );
+        renderSelect(
+          els.grPo,
+          pos.filter(x => x.status === 'APPROVED'),
+          'id',
+          'po_number',
+          'No approved POs'
+        );
+        renderSelect(
+          els.ivPo,
+          pos.filter(x => x.status === 'GOODS_RECEIVED' || x.status === 'APPROVED'),
+          'id',
+          'po_number',
+          'No eligible POs'
+        );
+        renderSelect(
+          els.pyInvoice,
+          invoices.filter(i => i.status === 'VERIFIED'),
+          'id',
+          'invoice_number',
+          'No verified invoices'
+        );
 
-      po_pr.innerHTML = prs
-        .filter(x => x.status !== 'CONVERTED_TO_PO')
-        .map(p => `<option value="${p.id}">${p.pr_number}</option>`)
-        .join('');
+        renderTable('vendorTable', vendors, ['vendor_code', 'vendor_name', 'city', 'payment_terms']);
+        renderTable('materialTable', materials, ['material_code', 'material_name', 'uom', 'price']);
+        renderTable('prTable', prs, ['pr_number', 'material_name', 'quantity', 'requested_by', 'status']);
+        renderTable('poTable', pos, ['po_number', 'pr_number', 'vendor_name', 'status']);
+        renderTable('grTable', grs, ['gr_number', 'po_number', 'quantity_received', 'status']);
+        renderTable('ivTable', invoices, ['invoice_number', 'po_number', 'amount', 'status']);
+        renderTable('pyTable', payments, ['payment_number', 'invoice_number', 'amount', 'status']);
 
-      gr_po.innerHTML = pos
-        .filter(x => x.status === 'APPROVED')
-        .map(p => `<option value="${p.id}">${p.po_number}</option>`)
-        .join('');
-
-      iv_po.innerHTML = pos
-        .filter(x => x.status === 'GOODS_RECEIVED' || x.status === 'APPROVED')
-        .map(p => `<option value="${p.id}">${p.po_number}</option>`)
-        .join('');
-
-      py_invoice.innerHTML = invoices
-        .filter(i => i.status === 'VERIFIED')
-        .map(i => `<option value="${i.id}">${i.invoice_number}</option>`)
-        .join('');
-
-      table('prTable', prs, ['pr_number', 'material_name', 'quantity', 'requested_by', 'status']);
-      table('poTable', pos, ['po_number', 'pr_number', 'vendor_name', 'status']);
-      table('grTable', grs, ['gr_number', 'po_number', 'quantity_received', 'status']);
-      table('ivTable', invoices, ['invoice_number', 'po_number', 'amount', 'status']);
-      table('pyTable', payments, ['payment_number', 'invoice_number', 'amount', 'status']);
+        updateProcessFlow(detectCurrentStep(prs, pos, grs, invoices, payments));
+      } catch (error) {
+        console.error('Failed to load dashboard data:', error);
+        showStatus(error.message || 'Failed to load dashboard data', 'error');
+      }
     }
+
+    window.initDb = initDb;
+    window.addVendor = addVendor;
+    window.addMaterial = addMaterial;
+    window.createPR = createPR;
+    window.createPO = createPO;
+    window.postGR = postGR;
+    window.postInvoice = postInvoice;
+    window.runPayment = runPayment;
 
     loadAll();
   </script>
