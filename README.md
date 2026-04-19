@@ -43,4 +43,10 @@ python app.py
 
 ### Frontend
 Open `project/frontend/p2p-dashboard.html` in a browser after starting the backend.
+<img width="639" height="820" alt="Screenshot 2026-04-19 223615" src="https://github.com/user-attachments/assets/904e16e9-d4ae-43c7-a1ba-668e48a907ef" />
+
+<img width="1889" height="886" alt="Screenshot 2026-04-19 234325" src="https://github.com/user-attachments/assets/5b89ef76-3a64-45d3-8c45-fec137810a77" />
+
+
+
 
