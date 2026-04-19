@@ -4,20 +4,27 @@ This is a ready-to-run project that highlights the Procure-to-Pay (P2P) workflow
 
 ## Project Structure
 
+## 📁 Project Structure
+
+```bash
 sap-p2p-project/
 ├── docs/
 │   ├── project-report.md
 │   └── sample-data.md
+│
 ├── project/
 │   ├── backend/
 │   │   ├── app.py
 │   │   └── requirements.txt
+│   │
 │   ├── frontend/
 │   │   └── p2p-dashboard.html
+│   │
 │   └── database/
 │       └── schema.sql
+│
 └── README.md
-
+```
 ## Features
 - Create vendors
 - Create materials
