@@ -1,6 +1,6 @@
 ## SAP P2P Working Project
 
-This is a complete, ready-to-run academic project for Procure-to-Pay (P2P) inspired by the SAP MM + FI flow.
+This is a complete, ready-to-run project for the Procure-to-Pay (P2P) workflow inspired by the SAP MM + FI flow.
 
 ## Project Structure
 
@@ -31,7 +31,7 @@ sap-p2p-project/
 ## Tech Stack
 - Python Flask
 - SQLite
-- HTML/CSS/JavaScript
+- HTML, CSS, JavaScript
 
 ## How to Run
 
@@ -44,4 +44,3 @@ python app.py
 ### Frontend
 Open `project/frontend/p2p-dashboard.html` in a browser after starting the backend.
 
-Backend URL: `http://127.0.0.1:5000`#
