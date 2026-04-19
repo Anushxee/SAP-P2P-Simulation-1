@@ -1,6 +1,6 @@
 ## SAP P2P Working Project
 
-This is a complete, ready-to-run project for the Procure-to-Pay (P2P) workflow inspired by the SAP MM + FI flow.
+This is a complete, ready-to-run project that highlights the Procure-to-Pay (P2P) workflow inspired by the SAP MM + FI flow.
 
 ## Project Structure
 
